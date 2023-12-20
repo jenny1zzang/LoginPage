@@ -80,4 +80,4 @@ app.get('/api/users/logout', auth, (req, res) => {
         .catch((err) => res.json({ success: false, err }))
 })
 
-app.listen(3000)
+app.listen(5000)
