@@ -39,9 +39,9 @@ userSchema.pre('save', function (next) {
 
     if (!user.isModified('password')) next()
 
-    bcrypt.genSalt(saltRounds, function(err, salt) {
+    bcrypt.genSalt(saltRounds, function (err, salt) {
         if (err) return next(err)
-        bcrypt.hash(user.password, salt, function(err, hash) {
+        bcrypt.hash(user.password, salt, function (err, hash) {
             if (err) return next(err)
             user.password = hash
             next()
@@ -61,8 +61,8 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.comparePassword = function (plainPassword, cb) {
     //plainpassword와 암호화된 비밀번호가 같은지 확인하기 -> plainpassword를 암호화 해서 암호화한 password와 같은지 확인하기.
     bcrypt.compare(plainPassword, this.password, function (err, isMatch) {
-        if (err) return cb(err),
-            cb(null, isMatch)
+        if (err) return cb(err)
+        cb(null, isMatch)
     })
 }
 
@@ -74,8 +74,8 @@ userSchema.methods.generateToken = function (cb) {
     var token = jwt.sign(user._id.toHexString(), 'secretToken')
     user.token = token
     user.save()
-        .then(user => {cb(null, user)})
-        .catch(err => {cb(err)})
+        .then(user => { cb(null, user) })
+        .catch(err => { cb(err) })
 
     // user.save(function(err, user){
     //     if(err) return cb(err)
@@ -83,15 +83,16 @@ userSchema.methods.generateToken = function (cb) {
     // })
 }
 
-userSchema.statics.findByToken = function(token,cb) {
+userSchema.statics.findByToken = function (token, cb) {
     var user = this
     //token decoding
-    jwt.verify(token, 'secretToken', function(err, decoded) {
-        user.findOne({ "_id" : decoded, "token": token})
-        .then(user => cb(null, user))
-        .catch(err => cb(err))
+    jwt.verify(token, 'secretToken', function (err, decoded) {
+        user.findOne({ "_id": decoded, "token": token })
+            .then(user => {cb(null, user)})
+            .catch(err => cb(err))
     })
 }
+
 const User = mongoose.model('User', userSchema)    //스키마를 모델로 감싸준다
 
 module.exports = { User }     //다른 파일에서도 쓸 수 있도록 export

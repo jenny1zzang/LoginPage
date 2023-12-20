@@ -46,14 +46,14 @@ app.post('/api/users/login', (req, res) => {
 
             user.comparePassword(req.body.password, (err, isMatch) => {
                 if (!isMatch) return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다" })
-            })
 
-            user.generateToken((err, user) => {
-                if (err) return res.status(400).send(err)
+                user.generateToken((err, user) => {
+                    if (err) return res.status(400).send(err)
 
-                res.cookie("x_auth", user.token)
-                    .status(200)
-                    .json({ loginSuccess: true, userId: user._id })
+                    res.cookie("x_auth", user.token)
+                        .status(200)
+                        .json({ loginSuccess: true, userId: user._id })
+                })
             })
         })
         .catch(err => {
@@ -76,8 +76,8 @@ app.get('/api/users/auth', auth, (req, res) => {
 
 app.get('/api/users/logout', auth, (req, res) => {
     User.findOneAndUpdate({ _id: req.user._id }, { token: "" })
-    .then(() => res.status(200).send({ success: true }))
-    .catch((err) => res.json({ success: false, err}))
+        .then(() => res.status(200).send({ success: true }))
+        .catch((err) => res.json({ success: false, err }))
 })
 
 app.listen(3000)
