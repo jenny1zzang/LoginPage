@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const { User } = require("./models/user")
 const config = require('./config/key')
 const cookieParser = require('cookie-parser')
+const { auth } = require("./middleware/auth")
 
 app.use(bodyParser.urlencoded({ extended: true }))
 
@@ -19,7 +20,7 @@ app.get('/', function (req, res) {
     res.send('Hello World hi')
 })
 
-app.post('/register', async (req, res) => {
+app.post('/api/users/register', async (req, res) => {
     const user = new User(req.body);
 
     //1번째 방법
@@ -38,7 +39,7 @@ app.post('/register', async (req, res) => {
         .catch((err) => { res.json({ success: false, err }) })
 })
 
-app.post('/login', (req, res) => {
+app.post('/api/users/login', (req, res) => {
     User.findOne({ email: req.body.email })
         .then(user => {
             if (!user) return res.json({ loginSuccess: false, message: "제공된 이메일에 해당하는 유저가 없습니다" })
@@ -58,6 +59,25 @@ app.post('/login', (req, res) => {
         .catch(err => {
             res.status(400).send(err)
         })
+})
+
+app.get('/api/users/auth', auth, (req, res) => {
+    res.status(200).json({
+        _id: req.user._id,
+        isAdmin: req.user.role === 0 ? false : true,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role,
+        image: req.user.image
+    })
+})
+
+app.get('/api/users/logout', auth, (req, res) => {
+    User.findOneAndUpdate({ _id: req.user._id }, { token: "" })
+    .then(() => res.status(200).send({ success: true }))
+    .catch((err) => res.json({ success: false, err}))
 })
 
 app.listen(3000)

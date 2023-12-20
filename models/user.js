@@ -74,12 +74,8 @@ userSchema.methods.generateToken = function (cb) {
     var token = jwt.sign(user._id.toHexString(), 'secretToken')
     user.token = token
     user.save()
-        .then(user => {
-            cb(null, user)
-        })
-        .catch(err => {
-            cb(err)
-        })
+        .then(user => {cb(null, user)})
+        .catch(err => {cb(err)})
 
     // user.save(function(err, user){
     //     if(err) return cb(err)
@@ -87,6 +83,15 @@ userSchema.methods.generateToken = function (cb) {
     // })
 }
 
-const User = mongoose.model('User', userSchema)     //스키마를 모델로 감싸준다
+userSchema.statics.findByToken = function(token,cb) {
+    var user = this
+    //token decoding
+    jwt.verify(token, 'secretToken', function(err, decoded) {
+        user.findOne({ "_id" : decoded, "token": token})
+        .then(user => cb(null, user))
+        .catch(err => cb(err))
+    })
+}
+const User = mongoose.model('User', userSchema)    //스키마를 모델로 감싸준다
 
 module.exports = { User }     //다른 파일에서도 쓸 수 있도록 export
